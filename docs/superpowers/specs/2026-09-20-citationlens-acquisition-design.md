@@ -65,7 +65,7 @@ The first priority is explicit problem/solution intent, followed by repeated pai
 
 Reddit is a research/discovery source, not an automated outbound channel. Reddit's current spam policy prohibits repeated or unsolicited mass engagement and specifically calls out automated tools used to facilitate spam; Reddit also states that bots/apps must not use automation for unsolicited outreach. citeturn937944search0turn937944search4
 
-The acquisition system may collect and summarize permitted public discussion references for research, but it must not automatically contact the author.
+The acquisition system may use permitted search/index results and other authorized access paths to discover and summarize public discussion references for research, but it must not scrape Reddit without an authorized agreement, and it must not automatically contact the author. Source-access method must be compatible with the platform's current terms and technical restrictions.
 
 ### B. Evidence-led public content
 
@@ -243,12 +243,14 @@ Neon stores the product's durable intake/audit state.
 
 The acquisition subsystem should use Neon only where durable application state or event history materially benefits the product. It should not turn Neon into a duplicate of every Notion research note.
 
-Potential product-side event data:
+Product-side event data should be kept in Neon when it is needed for durable application behavior, funnel measurement, idempotency, or audit history. Initial events:
 - intake submissions
 - free snapshot submissions
 - audit requests
 - delivery events
 - conversion events
+
+Notion is the human operating layer for prospect research, experiments, content, and outreach decisions. Neon is the application record for customer-facing workflow and durable events. The two systems should be linked by stable identifiers where both need to refer to the same object; neither should be treated as a full replica of the other.
 
 ### Source evidence
 

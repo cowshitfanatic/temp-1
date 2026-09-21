@@ -1,6 +1,6 @@
 # CitationLens Acquisition System Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (~~) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (- [ ]) syntax for tracking.
 
 **Goal:** Turn CitationLens from a lead-intake landing page into a durable, evidence-first acquisition system that can capture prospects, commercial intake, experiments, and the first measurable conversion loop without overbuilding.
 
@@ -49,11 +49,11 @@
 - normalizeAcquisitionEvent(input) returns { ok: true, value } or { ok: false, fields }.
 - npm test runs the complete Node test suite.
 
-~~ Step 1: Write the failing intake-validation test
+- [ ] **Step 1: Write the failing intake-validation test
 
 Create test/intake-validation.test.mjs:
 
-~~~js
+- [ ] **~js
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateIntake } from '../lib/intake-validation.mjs';
@@ -105,19 +105,19 @@ test('rejects invalid intake fields without throwing', () => {
     'buyerQuestions',
   ]);
 });
-~~~
+- [ ] **~
 
-~~ Step 2: Run the intake test to verify it fails
+- [ ] **Step 2: Run the intake test to verify it fails
 
 Run: npm test -- test/intake-validation.test.mjs
 
 Expected: FAIL because the validation module and test script do not yet exist.
 
-~~ Step 3: Write the failing event-contract test
+- [ ] **Step 3: Write the failing event-contract test
 
 Create test/acquisition-events.test.mjs:
 
-~~~js
+- [ ] **~js
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeAcquisitionEvent } from '../lib/acquisition-events.mjs';
@@ -150,33 +150,33 @@ test('rejects unknown event names', () => {
   assert.equal(result.ok, false);
   assert.deepEqual(result.fields, ['eventName']);
 });
-~~~
+- [ ] **~
 
-~~ Step 4: Run the event test to verify it fails
+- [ ] **Step 4: Run the event test to verify it fails
 
 Run: npm test -- test/acquisition-events.test.mjs
 
 Expected: FAIL because the event module does not yet exist.
 
-~~ Step 5: Implement the minimal contracts
+- [ ] **Step 5: Implement the minimal contracts
 
 Implement validateIntake and normalizeAcquisitionEvent. Preserve the current intake validation rules. The only allowed acquisition event names are:
-~~~text
+- [ ] **~text
 intake_submitted
 free_snapshot_requested
 audit_requested
 audit_paid
 audit_delivered
 repeat_request
-~~~
+- [ ] **~
 
 Normalize timestamps to ISO strings only after validating them as parseable dates.
 
-~~ Step 6: Replace duplicated validation
+- [ ] **Step 6: Replace duplicated validation
 
 Update api/intake.ts and server.mjs to use the shared intake contract while preserving their existing HTTP response shapes.
 
-~~ Step 7: Add the test script and verify the suite
+- [ ] **Step 7: Add the test script and verify the suite
 
 Add "test": "node --test test/*.test.mjs" to package.json.
 
@@ -184,12 +184,12 @@ Run: npm test
 
 Expected: all contract tests PASS with exit code 0.
 
-~~ Step 8: Commit
+- [ ] **Step 8: Commit
 
-~~~bash
+- [ ] **~bash
 git add lib test api/intake.ts server.mjs package.json
 git commit -m "feat: add shared acquisition contracts"
-~~~
+- [ ] **~
 
 ---
 
@@ -209,11 +209,11 @@ git commit -m "feat: add shared acquisition contracts"
 - store.recordEvent(event) is idempotent on eventId/event_id.
 - getSql() reads DATABASE_URL and throws a clear configuration error when absent.
 
-~~ Step 1: Write failing store tests
+- [ ] **Step 1: Write failing store tests
 
 Use an in-memory fake SQL adapter. Prove duplicate intake and duplicate event calls return the existing record and do not create a second row:
 
-~~~js
+- [ ] **~js
 test('recordEvent is idempotent by eventId', async () => {
   const store = createAcquisitionStore({ sql: fakeSql });
   const event = validEvent();
@@ -234,15 +234,15 @@ test('recordIntake is idempotent by submissionId', async () => {
 
   assert.equal(fakeSql.intakes.length, 1);
 });
-~~~
+- [ ] **~
 
-~~ Step 2: Run the store test and watch it fail
+- [ ] **Step 2: Run the store test and watch it fail
 
 Run: npm test -- test/acquisition-store.test.mjs
 
 Expected: FAIL because the store module does not yet exist.
 
-~~ Step 3: Add the Neon dependency and adapter
+- [ ] **Step 3: Add the Neon dependency and adapter
 
 Add @neondatabase/serverless. Create lib/neon.mjs with getSql() that reads DATABASE_URL and throws exactly:
 
@@ -250,15 +250,15 @@ DATABASE_URL is required for durable CitationLens persistence
 
 when it is missing.
 
-~~ Step 4: Implement the minimal acquisition store
+- [ ] **Step 4: Implement the minimal acquisition store
 
 Create lib/acquisition-store.mjs. Use parameterized SQL against leads, audits, and a new acquisition_events table. recordIntake must upsert by intake_id. recordEvent must insert by event_id and on conflict return the existing event.
 
-~~ Step 5: Create the acquisition_events table in Neon
+- [ ] **Step 5: Create the acquisition_events table in Neon
 
 Run this schema against the CitationLens Neon database:
 
-~~~sql
+- [ ] **~sql
 CREATE TABLE IF NOT EXISTS acquisition_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id TEXT NOT NULL UNIQUE,
@@ -277,24 +277,24 @@ CREATE TABLE IF NOT EXISTS acquisition_events (
 
 CREATE INDEX IF NOT EXISTS idx_acquisition_events_name_time
   ON acquisition_events (event_name, occurred_at DESC);
-~~~
+- [ ] **~
 
-~~ Step 6: Wire intake persistence
+- [ ] **Step 6: Wire intake persistence
 
 After successful validation, record the lead/audit intake and an intake_submitted event before returning success. A persistence failure must return HTTP 503 with error persistence_unavailable. Never return a success receipt when durable storage failed.
 
-~~ Step 7: Run the full suite
+- [ ] **Step 7: Run the full suite
 
 Run: npm test
 
 Expected: all tests PASS with exit code 0.
 
-~~ Step 8: Commit
+- [ ] **Step 8: Commit
 
-~~~bash
+- [ ] **~bash
 git add lib test package.json api/intake.ts server.mjs
 git commit -m "feat: persist acquisition events in Neon"
-~~~
+- [ ] **~
 
 ---
 
@@ -316,11 +316,11 @@ git commit -m "feat: persist acquisition events in Neon"
 - Outreach records include an approval state; there is no automatic-sent transition.
 - Content records retain evidence source and publication state.
 
-~~ Step 1: Define the operator contract
+- [ ] **Step 1: Define the operator contract
 
 Create docs/acquisition-operator-runbook.md with these required fields:
 
-~~~text
+- [ ] **~text
 Prospect:
 source, source_url, evidence_summary, pain_statement,
 buyer_intent, relevance, category, outreach_angle,
@@ -337,41 +337,41 @@ approval_state, sent_state, response_state, outcome
 Content:
 evidence_source, premise, audience, format,
 draft, channel, publication_status, observed_engagement, reuse_candidates
-~~~
+- [ ] **~
 
-~~ Step 2: Create the three Notion data sources
+- [ ] **Step 2: Create the three Notion data sources
 
 Use those exact concepts with appropriate text, URL, select/status, date, and relation fields. Keep the data model small; this is not a CRM replacement.
 
-~~ Step 3: Add operator views
+- [ ] **Step 3: Add operator views
 
 Create:
-~~~text
+- [ ] **~text
 Buyer-intent prospects: buyer_intent = High, newest first
 Outreach approval: approval_state = Needs Review
 Experiments: status != Complete, oldest active first
 Content review: publication_status = Draft or Needs Review
-~~~
+- [ ] **~
 
-~~ Step 4: Seed the five initial experiments
+- [ ] **Step 4: Seed the five initial experiments
 
 Create:
-~~~text
+- [ ] **~text
 High-intent discussion response
 Evidence-led AI-answer experiment
 One-question free snapshot
 Niche focus test
 Completed-audit content
-~~~
+- [ ] **~
 
 Each record must have a concrete hypothesis and measurable success metric.
 
-~~ Step 5: Commit the runbook
+- [ ] **Step 5: Commit the runbook
 
-~~~bash
+- [ ] **~bash
 git add docs/acquisition-operator-runbook.md
 git commit -m "docs: define acquisition operator workflow"
-~~~
+- [ ] **~
 
 ---
 
@@ -391,49 +391,49 @@ git commit -m "docs: define acquisition operator workflow"
 - Every prospect preserves the original source URL and a relevance rationale.
 - Every outbound draft remains in a non-sent approval state.
 
-~~ Step 1: Capture the campaign hypothesis
+- [ ] **Step 1: Capture the campaign hypothesis
 
 Write:
 
-~~~text
+- [ ] **~text
 Explicit complaints about inconsistent AI recommendations,
 competitor substitution, or difficulty measuring AI visibility
 should produce higher-quality acquisition signals than broad
 GEO/AEO educational discussion.
-~~~
+- [ ] **~
 
-~~ Step 2: Research and record a small batch
+- [ ] **Step 2: Research and record a small batch
 
 Research at least five current public signals across more than one search surface. Record only evidence necessary to establish relevance. For Reddit, use public search/index results for discovery only; do not scrape Reddit and do not contact authors automatically.
 
-~~ Step 3: Draft contextual responses
+- [ ] **Step 3: Draft contextual responses
 
 For each qualified signal, write a concise response that solves or clarifies the stated problem first and mentions CitationLens only where naturally relevant. Do not use generic promotion.
 
-~~ Step 4: Create one evidence-led research note
+- [ ] **Step 4: Create one evidence-led research note
 
 Draft a compact public note about the distinction between brand recommendation, citation, and competitor substitution. Bound claims to the observed sample, date, and research environment.
 
-~~ Step 5: Review funnel movement
+- [ ] **Step 5: Review funnel movement
 
 Record:
-~~~text
+- [ ] **~text
 signals_found
 qualified_prospects
 meaningful_interactions
 free_snapshot_requests
 audit_requests
 paid_audits
-~~~
+- [ ] **~
 
 Do not substitute impressions, followers, likes, or upvotes for these funnel measures.
 
-~~ Step 6: Commit the campaign artifact
+- [ ] **Step 6: Commit the campaign artifact
 
-~~~bash
+- [ ] **~bash
 git add docs/acquisition-first-campaign.md
 git commit -m "docs: capture first acquisition campaign"
-~~~
+- [ ] **~
 
 ---
 
@@ -452,11 +452,40 @@ git commit -m "docs: capture first acquisition campaign"
 - buildSnapshotResult(observation) requires an observation, run date, and environment and never emits a numeric visibility score.
 - A snapshot event is stored in Neon with a stable event ID.
 
-~~ Step 1: Write failing snapshot tests
+- [ ] **Step 1: Write failing snapshot tests
+
+Create test/free-snapshot.test.mjs:
 
 ~~~js
-test('accepts exactly one buyer question', () => { /* concrete request assertion */ });
-test('rejects zero buyer questions', () => { /* concrete rejection assertion */ });
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { validateFreeSnapshotRequest, buildSnapshotResult } from '../lib/free-snapshot.mjs';
+
+test('accepts exactly one buyer question', () => {
+  const result = validateFreeSnapshotRequest({
+    companyUrl: 'https://example.com',
+    buyerQuestion: 'best project management software for agencies',
+  });
+
+  assert.deepEqual(result, {
+    ok: true,
+    value: {
+      companyUrl: 'https://example.com',
+      buyerQuestion: 'best project management software for agencies',
+    },
+  });
+});
+
+test('rejects zero buyer questions', () => {
+  const result = validateFreeSnapshotRequest({
+    companyUrl: 'https://example.com',
+    buyerQuestion: '',
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.fields, ['buyerQuestion']);
+});
+
 test('builds a bounded observation with date and environment', () => {
   const result = buildSnapshotResult({
     answer: 'Example answer',
@@ -467,46 +496,52 @@ test('builds a bounded observation with date and environment', () => {
     environment: 'manual-research',
   });
 
-  assert.equal(result.brandStatus, 'absent');
-  assert.equal(result.runDate, '2026-09-21');
-  assert.equal(result.environment, 'manual-research');
+  assert.deepEqual(result, {
+    answer: 'Example answer',
+    brandStatus: 'absent',
+    competitors: ['Acme'],
+    citations: [{ title: 'Source', url: 'https://source.example/article' }],
+    runDate: '2026-09-21',
+    environment: 'manual-research',
+    limitations: 'AI answers vary by model, date, location, prompt wording, and other context.',
+  });
 });
 ~~~
 
-~~ Step 2: Run the snapshot tests and watch them fail
+- [ ] **Step 2: Run the snapshot tests and watch them fail
 
 Run: npm test -- test/free-snapshot.test.mjs
 
 Expected: FAIL because the snapshot module does not yet exist.
 
-~~ Step 3: Implement the minimal snapshot contracts
+- [ ] **Step 3: Implement the minimal snapshot contracts
 
 Reject malformed URLs and anything other than one buyer question. Require run date and environment in result construction. Do not create a score.
 
-~~ Step 4: Add the public snapshot form and upgrade path
+- [ ] **Step 4: Add the public snapshot form and upgrade path
 
 The UI asks for one company URL and one buyer-intent question and then displays the useful limited observation plus a dated-environment disclaimer and the $99 audit CTA. Do not gate the snapshot result behind email.
 
-~~ Step 5: Record the snapshot event
+- [ ] **Step 5: Record the snapshot event
 
 Store free_snapshot_requested with the minimum payload needed for funnel measurement and idempotency.
 
-~~ Step 6: Verify
+- [ ] **Step 6: Verify
 
 Run:
-~~~bash
+- [ ] **~bash
 npm test
 npm run build
-~~~
+- [ ] **~
 
 Expected: both commands exit 0.
 
-~~ Step 7: Commit
+- [ ] **Step 7: Commit
 
-~~~bash
+- [ ] **~bash
 git add lib test api/snapshot.ts src/App.tsx src/index.css server.mjs
 git commit -m "feat: add free buyer visibility snapshot"
-~~~
+- [ ] **~
 
 ---
 
@@ -515,19 +550,19 @@ git commit -m "feat: add free buyer visibility snapshot"
 **Files:**
 - Modify only files required by review findings.
 
-~~ Step 1: Run the full suite
+- [ ] **Step 1: Run the full suite
 
 Run: npm test
 
 Expected: 0 failures.
 
-~~ Step 2: Run the production build
+- [ ] **Step 2: Run the production build
 
 Run: npm run build
 
 Expected: exit 0.
 
-~~ Step 3: Review the whole branch against the spec
+- [ ] **Step 3: Review the whole branch against the spec
 
 Check the complete diff against:
 - docs/superpowers/specs/2026-09-20-citationlens-acquisition-design.md
@@ -536,7 +571,7 @@ Check the complete diff against:
 
 Pay particular attention to unsupported claims and accidental automation of outbound actions.
 
-~~ Step 4: Verify deployed intake behavior
+- [ ] **Step 4: Verify deployed intake behavior
 
 On the Render deployment, verify:
 - valid intake returns a receipt only when persistence succeeds
@@ -544,20 +579,20 @@ On the Render deployment, verify:
 - malformed JSON returns 400
 - free snapshot requests create durable acquisition events once Task 5 is complete
 
-~~ Step 5: Update the operator handoff
+- [ ] **Step 5: Update the operator handoff
 
 Record in docs/acquisition-operator-runbook.md:
-~~~text
+- [ ] **~text
 current public URL
 current branch/commit
 current funnel stages
 human-only actions
 next experiment
-~~~
+- [ ] **~
 
-~~ Step 6: Commit the verified handoff
+- [ ] **Step 6: Commit the verified handoff
 
-~~~bash
+- [ ] **~bash
 git add docs/acquisition-operator-runbook.md
 git commit -m "chore: verify acquisition system readiness"
-~~~
+- [ ] **~

@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateIntake } from './lib/intake-validation.mjs';
 
 const root = join(fileURLToPath(new URL('.', import.meta.url)), 'dist');
 const port = Number(process.env.PORT || 3000);
@@ -28,33 +29,22 @@ async function readJson(req) {
   return JSON.parse(data || '{}');
 }
 
-function validate(body) {
-  const errors = [];
-  if (typeof body.submissionId !== 'string' || body.submissionId.trim().length < 8) errors.push('submissionId');
-  if (typeof body.workEmail !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.workEmail.trim())) errors.push('workEmail');
-  if (typeof body.companyName !== 'string' || body.companyName.trim().length < 2) errors.push('companyName');
-
-  try {
-    const url = new URL(String(body.companyUrl || '').trim());
-    if (url.protocol !== 'https:' || !url.hostname) errors.push('companyUrl');
-  } catch {
-    errors.push('companyUrl');
-  }
-
-  if (typeof body.category !== 'string' || body.category.trim().length < 2) errors.push('category');
-  if (!Array.isArray(body.competitors) || body.competitors.length > 3) errors.push('competitors');
-  if (!Array.isArray(body.buyerQuestions) || body.buyerQuestions.length < 1 || body.buyerQuestions.length > 3) errors.push('buyerQuestions');
-  return errors;
-}
-
 async function handler(req, res) {
   if (req.url === '/api/intake' && req.method === 'POST') {
     try {
       const body = await readJson(req);
-      const errors = validate(body);
-      if (errors.length) return send(res, 400, JSON.stringify({ ok: false, error: 'validation_failed', fields: errors }), 'application/json; charset=utf-8');
+      const result = validateIntake(body);
 
-      const cleanId = String(body.submissionId).replace(/[^a-z0-9]/gi, '').slice(0, 10).toUpperCase();
+      if (!result.ok) {
+        return send(
+          res,
+          400,
+          JSON.stringify({ ok: false, error: 'validation_failed', fields: result.fields }),
+          'application/json; charset=utf-8',
+        );
+      }
+
+      const cleanId = result.value.submissionId.replace(/[^a-z0-9]/gi, '').slice(0, 10).toUpperCase();
       return send(
         res,
         200,
